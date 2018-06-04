@@ -500,6 +500,18 @@ Logic.registerPanel(P_CONTAINERS_LIST, {
       }
     });
 
+    Logic.addEnterHandler(document.querySelector("#create-from-current-page-link"), async function () {
+      try {
+        await browser.runtime.sendMessage({
+          method: "createFromCurrentTab"
+        });
+        window.close();
+      }
+      catch (ex) {
+        window.close();
+      }
+    })
+
     document.addEventListener("keydown", (e) => {
       const selectables = [...document.querySelectorAll("[tabindex='0'], [tabindex='-1']")];
       const element = document.activeElement;

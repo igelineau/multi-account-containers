@@ -75,6 +75,59 @@ const backgroundLogic = {
     });
   },
 
+  userContextId(cookieStoreId = "") {
+    const userContextId = cookieStoreId.replace("firefox-container-", "");
+    return (userContextId !== cookieStoreId) ? Number(userContextId) : false;
+  },
+
+  async createFromCurrentTab(options) {
+    const activeTabs = await browser.tabs.query({active: true, windowId: browser.windows.WINDOW_ID_CURRENT});
+    if (activeTabs.length === 0) {
+      return;
+    }
+
+    const activeTab = activeTabs[0];
+    
+    if(!this.isPermissibleURL(activeTab.url)) {
+      return;
+     }
+
+    const assignment = await assignManager._getAssignment(activeTab);
+    const url = new window.URL(activeTab.url);
+
+    const containerName = url.hostname.replace(/^www\./, '');
+    const containersFound = await browser.contextualIdentities.query({
+      "name": containerName
+    })
+    let container;
+    if(containersFound.length > 0)
+    {
+      container = containersFound[0];
+    }
+
+    if(!container){
+      container = await browser.contextualIdentities.create({
+        "name": containerName,
+        "color": "purple",
+        "icon": "circle"
+      });        
+    }
+
+    const userContextId = this.userContextId(container.cookieStoreId);
+    const currentassignmentContextId = !assignment ? null : assignment.userContextId;
+
+    if(container && String(userContextId) !== currentassignmentContextId)
+    {
+      const currentIndex = activeTab.index;
+      const currentPinned = activeTab.Pinned;
+  
+      const wrappedTab = await browser.tabs.create({url: activeTab.url, cookieStoreId: container.cookieStoreId, index: currentIndex+1, pinned: currentPinned });
+      await browser.tabs.remove(activeTab.id);
+    }
+
+    await assignManager._setOrRemoveAssignment(activeTab.id, activeTab.url, this.userContextId(container.cookieStoreId), false);
+  },
+
   isPermissibleURL(url) {
     const protocol = new URL(url).protocol;
     // We can't open these we just have to throw them away

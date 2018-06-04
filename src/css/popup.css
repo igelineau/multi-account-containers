@@ -463,8 +463,24 @@ manage things like container crud */
   text-decoration: none;
 }
 
+#container-panel #create-from-current-page-link {
+  align-items: center;
+  block-size: var(--block-url-label-size);
+  border: 1px solid #d8d8d8;
+  border-radius: var(--small-radius);
+  color: var(--title-text-color);
+  display: flex;
+  font-size: var(--small-text-size);
+  inline-size: 150px;
+  justify-content: center;
+  margin-right: 4px;
+  text-decoration: none;
+}
+
 #container-panel #sort-containers-link:hover,
-#container-panel #sort-containers-link:focus {
+#container-panel #sort-containers-link:focus,
+#container-panel #create-from-current-page-link:hover,
+#container-panel #create-from-current-page-link:focus {
   background: #f2f2f2;
 }
 
